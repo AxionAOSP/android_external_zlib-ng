@@ -1,0 +1,443 @@
+package {
+    default_applicable_licenses: ["external_zlib-ng_license"],
+}
+
+license {
+    name: "external_zlib-ng_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Zlib",
+    ],
+    license_text: [
+        "LICENSE.md",
+    ],
+}
+
+cflags_shared = [
+    "-DZLIB_COMPAT",
+    "-DWITH_GZFILEOP",
+    "-DZLIB_DLL",
+    "-DHAVE_VISIBILITY_HIDDEN",
+    "-DHAVE_VISIBILITY_INTERNAL",
+    "-DHAVE_BUILTIN_CTZ",
+    "-DHAVE_BUILTIN_CTZLL",
+    "-DZLIB_CONST",
+    "-D_LARGEFILE64_SOURCE=1",
+    "-D__USE_LARGEFILE64",
+    "-DWITH_OPTIM",
+    "-DWITH_NEW_STRATEGIES",
+    "-DWITH_CRC32_CHORBA",
+    "-DWITH_ALL_FALLBACKS",
+    "-DUNALIGNED_OK",
+    "-O3",
+    "-DNDEBUG",
+    "-fno-semantic-interposition",
+    "-Wall",
+    "-Werror",
+    "-Wno-implicit-fallthrough",
+    "-Wno-unused",
+    "-Wno-unused-parameter",
+    "-Wno-deprecated-non-prototype",
+    "-std=c11",
+]
+
+cflags_lp64 = [
+    "-DUNALIGNED64_OK",
+]
+
+cflags_arm = [
+    "-DARM_FEATURES",
+    "-DARM_NEON",
+    "-DARM_NEON_HASLD4",
+    "-DARM_CRC32",
+    "-DARM_CRC32_INTRIN",
+    "-DHAVE_ARM_ACLE_H",
+]
+
+cflags_arm64 = cflags_arm + cflags_lp64
+
+cflags_x86 = [
+    "-DX86_FEATURES",
+    "-DX86_SSE2",
+    "-DX86_SSSE3",
+    "-DX86_SSE41",
+    "-DX86_SSE42",
+    "-DX86_PCLMULQDQ_CRC",
+    "-DX86_AVX2",
+    "-DX86_AVX512",
+    "-DX86_AVX512VNNI",
+    "-DX86_VPCLMULQDQ_CRC",
+    "-DX86_HAVE_XSAVE_INTRIN",
+    "-DHAVE_CPUID_GNU",
+]
+
+cflags_x86_64 = cflags_x86 + cflags_lp64
+
+cflags_riscv64 = [
+    "-DRISCV_FEATURES",
+    "-DRISCV_RVV",
+] + cflags_lp64
+
+libz_srcs = [
+    "adler32.c",
+    "compress.c",
+    "cpu_features.c",
+    "crc32.c",
+    "crc32_braid_comb.c",
+    "deflate.c",
+    "deflate_fast.c",
+    "deflate_huff.c",
+    "deflate_medium.c",
+    "deflate_quick.c",
+    "deflate_rle.c",
+    "deflate_slow.c",
+    "deflate_stored.c",
+    "functable.c",
+    "gzlib.c",
+    "gzread.c",
+    "gzwrite.c",
+    "infback.c",
+    "inflate.c",
+    "inftrees.c",
+    "insert_string.c",
+    "insert_string_roll.c",
+    "trees.c",
+    "uncompr.c",
+    "zutil.c",
+    "arch/generic/adler32_c.c",
+    "arch/generic/adler32_fold_c.c",
+    "arch/generic/chunkset_c.c",
+    "arch/generic/compare256_c.c",
+    "arch/generic/crc32_braid_c.c",
+    "arch/generic/crc32_chorba_c.c",
+    "arch/generic/crc32_fold_c.c",
+    "arch/generic/slide_hash_c.c",
+    "android_zlib_compat.c",
+]
+
+srcs_arm = [
+    "arch/arm/arm_features.c",
+    "arch/arm/adler32_neon.c",
+    "arch/arm/chunkset_neon.c",
+    "arch/arm/compare256_neon.c",
+    "arch/arm/slide_hash_neon.c",
+]
+
+srcs_arm_crc = [
+    "arch/arm/crc32_armv8.c",
+]
+
+srcs_riscv64 = [
+    "arch/riscv/riscv_features.c",
+    "arch/riscv/adler32_rvv.c",
+    "arch/riscv/chunkset_rvv.c",
+    "arch/riscv/compare256_rvv.c",
+    "arch/riscv/slide_hash_rvv.c",
+]
+
+cc_defaults {
+    name: "libz_defaults",
+    defaults: [
+        "bug_24465209_workaround",
+    ],
+
+    cflags: cflags_shared,
+    stl: "none",
+    export_include_dirs: ["."],
+    local_include_dirs: [
+        ".",
+        "arch/generic",
+    ],
+
+    host_supported: true,
+    native_bridge_supported: true,
+
+    vendor_available: true,
+    product_available: true,
+    ramdisk_available: true,
+    vendor_ramdisk_available: true,
+    recovery_available: true,
+
+    arch: {
+        arm: {
+            cflags: cflags_arm,
+            srcs: srcs_arm + srcs_arm_crc,
+        },
+        arm64: {
+            cflags: cflags_arm64,
+            srcs: srcs_arm + srcs_arm_crc,
+        },
+        x86: {
+            local_include_dirs: ["arch/x86"],
+        },
+        x86_64: {
+            local_include_dirs: ["arch/x86"],
+        },
+        riscv64: {
+            cflags: cflags_riscv64,
+            srcs: srcs_riscv64,
+        },
+    },
+
+    target: {
+        linux_arm: {
+            cflags: [
+                "-DARM_OS_LINUX",
+                "-DHAVE_SYS_AUXV_H",
+            ],
+        },
+        linux_arm64: {
+            cflags: [
+                "-DARM_OS_LINUX",
+                "-DHAVE_SYS_AUXV_H",
+            ],
+        },
+        darwin_arm64: {
+            cflags: ["-DARM_OS_IOS"],
+        },
+        android_x86: {
+            cflags: cflags_x86 + [
+                "-mssse3",
+                "-msse4.1",
+                "-msse4.2",
+                "-mpclmul",
+                "-mavx2",
+                "-mbmi2",
+                "-mvpclmulqdq",
+                "-mavx512f",
+                "-mavx512dq",
+                "-mavx512bw",
+                "-mavx512vl",
+                "-mavx512vnni",
+                "-mxsave",
+            ],
+            srcs: [
+                "arch/x86/x86_features.c",
+                "arch/x86/chunkset_sse2.c",
+                "arch/x86/compare256_sse2.c",
+                "arch/x86/slide_hash_sse2.c",
+                "arch/x86/chorba_sse2.c",
+                "arch/x86/adler32_ssse3.c",
+                "arch/x86/chunkset_ssse3.c",
+                "arch/x86/chorba_sse41.c",
+                "arch/x86/adler32_sse42.c",
+                "arch/x86/crc32_pclmulqdq.c",
+                "arch/x86/adler32_avx2.c",
+                "arch/x86/chunkset_avx2.c",
+                "arch/x86/compare256_avx2.c",
+                "arch/x86/slide_hash_avx2.c",
+                "arch/x86/crc32_vpclmulqdq.c",
+                "arch/x86/adler32_avx512.c",
+                "arch/x86/chunkset_avx512.c",
+                "arch/x86/compare256_avx512.c",
+                "arch/x86/adler32_avx512_vnni.c",
+            ],
+        },
+        android_x86_64: {
+            cflags: cflags_x86_64 + [
+                "-mssse3",
+                "-msse4.1",
+                "-msse4.2",
+                "-mpclmul",
+                "-mavx2",
+                "-mbmi2",
+                "-mvpclmulqdq",
+                "-mavx512f",
+                "-mavx512dq",
+                "-mavx512bw",
+                "-mavx512vl",
+                "-mavx512vnni",
+                "-mxsave",
+            ],
+            srcs: [
+                "arch/x86/x86_features.c",
+                "arch/x86/chunkset_sse2.c",
+                "arch/x86/compare256_sse2.c",
+                "arch/x86/slide_hash_sse2.c",
+                "arch/x86/chorba_sse2.c",
+                "arch/x86/adler32_ssse3.c",
+                "arch/x86/chunkset_ssse3.c",
+                "arch/x86/chorba_sse41.c",
+                "arch/x86/adler32_sse42.c",
+                "arch/x86/crc32_pclmulqdq.c",
+                "arch/x86/adler32_avx2.c",
+                "arch/x86/chunkset_avx2.c",
+                "arch/x86/compare256_avx2.c",
+                "arch/x86/slide_hash_avx2.c",
+                "arch/x86/crc32_vpclmulqdq.c",
+                "arch/x86/adler32_avx512.c",
+                "arch/x86/chunkset_avx512.c",
+                "arch/x86/compare256_avx512.c",
+                "arch/x86/adler32_avx512_vnni.c",
+            ],
+        },
+        linux_bionic: {
+            enabled: true,
+        },
+        windows: {
+            enabled: true,
+        },
+    },
+}
+
+cc_library {
+    name: "libz",
+    defaults: ["libz_defaults"],
+
+    srcs: libz_srcs,
+
+    unique_host_soname: true,
+    static_ndk_lib: true,
+
+    double_loadable: true,
+
+    stubs: {
+        versions: [
+            "29",
+            "30",
+        ],
+        symbol_file: "libz.map.txt",
+    },
+
+    header_abi_checker: {
+        enabled: false,
+    },
+
+    static: {
+        apex_available: [
+            "com.android.runtime",
+            "com.android.appsearch",
+        ],
+    },
+
+    target: {
+        product: {
+            no_stubs: true,
+        },
+        vendor: {
+            no_stubs: true,
+        },
+    },
+
+    afdo: true,
+    min_sdk_version: "apex_inherit",
+}
+
+cc_library {
+    name: "libz_stable",
+    visibility: [
+        "//bootable/recovery/applypatch",
+        "//bootable/recovery/tests",
+        "//bootable/recovery/updater",
+        "//bootable/deprecated-ota/applypatch",
+        "//bootable/deprecated-ota/tests",
+        "//bootable/deprecated-ota/updater",
+    ],
+    cflags: cflags_shared,
+    stl: "none",
+    export_include_dirs: ["."],
+    local_include_dirs: [
+        ".",
+        "arch/generic",
+    ],
+    srcs: libz_srcs,
+    host_supported: true,
+    vendor_available: true,
+    recovery_available: true,
+}
+
+ndk_headers {
+    name: "libz_headers",
+    from: "",
+    to: "",
+    srcs: [
+        "zconf.h",
+        "zlib.h",
+        "zlib_name_mangling.h",
+    ],
+    license: "LICENSE.md",
+}
+
+ndk_library {
+    name: "libz",
+    symbol_file: "libz.map.txt",
+    first_version: "9",
+    unversioned_until: "current",
+}
+
+genrule {
+    name: "libc_musl_sysroot_zlib_headers",
+    visibility: ["//external/musl"],
+    srcs: [
+        "LICENSE.md",
+        "zconf.h",
+        "zlib.h",
+        "zlib_name_mangling.h",
+    ],
+    out: ["libc_musl_sysroot_zlib_headers.zip"],
+    tools: [
+        "soong_zip",
+        "zip2zip",
+    ],
+    cmd: "$(location soong_zip) -o $(genDir)/sysroot.zip -symlinks=false" +
+        " -j -f $(location LICENSE.md) " +
+        " -j -P include " +
+        "  -f $(location zconf.h) " +
+        "  -f $(location zlib.h) " +
+        "  -f $(location zlib_name_mangling.h) " +
+        " && " +
+        "$(location zip2zip) -i $(genDir)/sysroot.zip -o $(out) " +
+        " include/**/*:include " +
+        " LICENSE.md:NOTICE.zlib",
+}
+
+cc_library {
+    name: "zlib_google_compression_utils_portable",
+    defaults: ["libz_defaults"],
+    srcs: [
+        "google/compression_utils_portable.cc",
+    ],
+    export_include_dirs: ["google"],
+    host_supported: true,
+    shared_libs: ["libz"],
+    sdk_version: "minimum",
+    visibility: ["//external/angle"],
+    apex_available: [
+        "com.android.runtime",
+        "//apex_available:platform",
+    ],
+}
+
+cc_library_static {
+    name: "tflite_support_libz",
+    defaults: ["libz_defaults"],
+    srcs: [
+        "contrib/minizip/ioapi.c",
+        "contrib/minizip/unzip.c",
+    ],
+    sdk_version: "current",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.adservices",
+        "com.android.extservices",
+    ],
+}
+
+cc_defaults {
+    name: "zlib_fuzz_defaults",
+    static_libs: ["libz"],
+    host_supported: true,
+}
+
+cc_fuzz {
+    name: "zlib_deflate_fuzzer",
+    defaults: ["zlib_fuzz_defaults"],
+    srcs: ["test/fuzz/fuzzer_compress.c"],
+}
+
+cc_fuzz {
+    name: "zlib_inflate_fuzzer",
+    defaults: ["zlib_fuzz_defaults"],
+    srcs: ["test/fuzz/fuzzer_example_small.c"],
+}

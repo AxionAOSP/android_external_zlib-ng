@@ -1,0 +1,15 @@
+name: "zlib-ng"
+description: "zlib-ng: zlib data compression library for the next generation systems. Drop-in replacement for zlib with significantly improved compression and decompression performance."
+third_party {
+  license_type: NOTICE
+  last_upgrade_date {
+    year: 2026
+    month: 3
+    day: 16
+  }
+  identifier {
+    type: "Git"
+    value: "https://github.com/zlib-ng/zlib-ng"
+    version: "2.3.3"
+  }
+}
