@@ -58,7 +58,6 @@ Testing
 /*.cmake
 *.stackdump
 *._h
-zconf.h
 zconf.h.cmakein
 zconf.h.included
 zconf-ng.h
@@ -81,7 +80,6 @@ a.out
 Makefile.tmp
 /makecrct
 /maketrees
-gzread_mangle.h
 
 /Debug
 /example.dir
