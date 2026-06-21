@@ -160,7 +160,9 @@ cc_defaults {
 
     arch: {
         arm: {
-            cflags: cflags_arm,
+            cflags: cflags_arm + [
+                "-mcrc",
+            ],
             srcs: srcs_arm + srcs_arm_crc,
         },
         arm64: {
